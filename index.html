@@ -96,9 +96,22 @@
     .loader-bar-fill {
       height: 100%; width: 0;
       background: var(--gradient-2); border-radius: 99px;
-      animation: loadFill 1.8s ease forwards;
+      animation: loadFill 2.5s ease forwards;
     }
     @keyframes loadFill { to { width: 100%; } }
+
+    .loader-status {
+      margin-top: 1rem; font-size: 0.8rem;
+      color: var(--text-muted); text-align: center;
+    }
+    .loader-fallback {
+      margin-top: 1.5rem; font-size: 0.85rem;
+      color: var(--text-secondary); text-align: center;
+      display: none;
+    }
+    .loader-fallback a {
+      color: var(--accent); cursor: pointer; text-decoration: underline;
+    }
 
     .loader-dots { display: flex; gap: 6px; margin-top: 1.5rem; }
     .loader-dots span {
@@ -1045,6 +1058,11 @@
     <div class="loader-dots">
       <span></span><span></span><span></span>
     </div>
+    <div class="loader-status" id="loader-status">جاري التحميل...</div>
+    <div class="loader-fallback" id="loader-fallback">
+      يبدو أن التحميل يستغرق وقتاً طويلاً.<br>
+      <a onclick="forceShowAuth()">انقر هنا للمتابعة</a>
+    </div>
   </div>
 
   <!-- ============================================
@@ -1055,88 +1073,196 @@
   <!-- ============================================
        AUTH SCREEN
   ============================================ -->
-  <div id="auth-screen">
-    <div class="auth-container">
-      <div class="auth-hero">
-        <div class="auth-logo">
-          <div class="auth-logo-icon">✦</div>
-          <span class="auth-logo-text">Portfolio Builder</span>
+  <div id="auth-screen" style="display:none;">
+    <div style="width:100%;max-width:1100px;display:flex;gap:48px;align-items:flex-start;padding:40px 24px;flex-wrap:wrap;justify-content:center;position:relative;z-index:1;">
+
+      <!-- LEFT: Auth Card -->
+      <div style="flex:1;min-width:300px;max-width:420px;">
+        <div class="auth-hero">
+          <div class="auth-logo">
+            <div class="auth-logo-icon">✦</div>
+            <span class="auth-logo-text">Portfolio Builder</span>
+          </div>
+          <p class="auth-tagline">أنشئ صفحة Portfolio احترافية في دقائق<br>وشاركها مع العالم عبر رابط مخصص</p>
         </div>
-        <p class="auth-tagline">أنشئ صفحة Portfolio احترافية في دقائق<br>وشاركها مع العالم عبر رابط مخصص</p>
+
+        <div class="auth-card">
+          <div class="auth-tabs">
+            <button class="auth-tab active" onclick="switchAuthTab('login')">تسجيل الدخول</button>
+            <button class="auth-tab" onclick="switchAuthTab('register')">إنشاء حساب جديد</button>
+          </div>
+
+          <!-- Login Form -->
+          <div id="login-form" class="auth-form">
+            <div class="form-group">
+              <label class="form-label">📧 البريد الإلكتروني</label>
+              <input type="email" id="login-email" class="form-input" placeholder="example@email.com" dir="ltr" onkeydown="if(event.key==='Enter')loginEmail()">
+            </div>
+            <div class="form-group">
+              <label class="form-label">🔒 كلمة المرور</label>
+              <div style="position:relative;">
+                <input type="password" id="login-password" class="form-input" placeholder="••••••••" dir="ltr" onkeydown="if(event.key==='Enter')loginEmail()" style="padding-left:44px;">
+                <button onclick="togglePassword('login-password', this)" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1rem;">👁️</button>
+              </div>
+            </div>
+            <button class="btn btn-primary btn-full" onclick="loginEmail()" id="login-btn">
+              🚀 دخول
+            </button>
+            <div class="divider">أو سجّل دخولك بسرعة عبر</div>
+            <button class="btn btn-google btn-full" onclick="loginGoogle()">
+              <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+              الدخول بحساب Google (الأسرع)
+            </button>
+            <p style="text-align:center;font-size:0.8rem;color:var(--text-muted);margin-top:8px;">
+              ليس لديك حساب؟ <a onclick="document.querySelectorAll('.auth-tab')[1].click()" style="color:var(--accent);cursor:pointer;text-decoration:underline;">أنشئ حساباً مجاناً</a>
+            </p>
+          </div>
+
+          <!-- Register Form -->
+          <div id="register-form" class="auth-form hidden">
+            <div style="background:rgba(0,212,255,0.06);border:1px solid rgba(0,212,255,0.2);border-radius:8px;padding:12px 16px;margin-bottom:4px;font-size:0.85rem;color:var(--accent);">
+              🎉 التسجيل مجاني تماماً — لا بطاقة بنكية مطلوبة
+            </div>
+            <div class="form-group">
+              <label class="form-label">👤 اسمك الكامل</label>
+              <input type="text" id="reg-name" class="form-input" placeholder="مثال: أحمد محمد">
+            </div>
+            <div class="form-group">
+              <label class="form-label">📧 البريد الإلكتروني</label>
+              <input type="email" id="reg-email" class="form-input" placeholder="example@email.com" dir="ltr">
+            </div>
+            <div class="form-group">
+              <label class="form-label">🔒 كلمة المرور</label>
+              <div style="position:relative;">
+                <input type="password" id="reg-password" class="form-input" placeholder="6 أحرف على الأقل" dir="ltr" style="padding-left:44px;" oninput="checkPasswordStrength(this.value)">
+                <button onclick="togglePassword('reg-password', this)" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1rem;">👁️</button>
+              </div>
+              <div id="pwd-strength" style="height:3px;background:rgba(255,255,255,0.1);border-radius:99px;margin-top:6px;overflow:hidden;">
+                <div id="pwd-strength-fill" style="height:100%;width:0;border-radius:99px;transition:all 0.3s;"></div>
+              </div>
+              <span id="pwd-strength-text" style="font-size:0.75rem;color:var(--text-muted);"></span>
+            </div>
+            <button class="btn btn-primary btn-full" onclick="registerEmail()">
+              ✨ إنشاء حسابي الآن
+            </button>
+            <div class="divider">أو سجّل بسرعة عبر</div>
+            <button class="btn btn-google btn-full" onclick="loginGoogle()">
+              <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+              إنشاء حساب بـ Google (كليك واحد)
+            </button>
+            <p style="text-align:center;font-size:0.8rem;color:var(--text-muted);margin-top:8px;">
+              لديك حساب بالفعل؟ <a onclick="document.querySelectorAll('.auth-tab')[0].click()" style="color:var(--accent);cursor:pointer;text-decoration:underline;">تسجيل الدخول</a>
+            </p>
+          </div>
+        </div>
+
+        <div class="auth-features">
+          <div class="feature-item">
+            <div class="feature-icon">⚡</div>
+            <div class="feature-title">سريع وسهل</div>
+            <div class="feature-desc">أنشئ Portfolio في 5 دقائق</div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">🎨</div>
+            <div class="feature-title">3 قوالب احترافية</div>
+            <div class="feature-desc">اختر القالب المناسب لك</div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">🔗</div>
+            <div class="feature-title">رابط خاص بك</div>
+            <div class="feature-desc">yoursite.com/p/اسمك</div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">📱</div>
+            <div class="feature-title">بطاقة رقمية</div>
+            <div class="feature-desc">VCF وQR Code تلقائي</div>
+          </div>
+        </div>
       </div>
 
-      <div class="auth-card">
-        <div class="auth-tabs">
-          <button class="auth-tab active" onclick="switchAuthTab('login')">تسجيل الدخول</button>
-          <button class="auth-tab" onclick="switchAuthTab('register')">إنشاء حساب</button>
+      <!-- RIGHT: Demo Preview + How-to guide -->
+      <div style="flex:1;min-width:300px;max-width:500px;">
+
+        <!-- Demo Portfolio Card -->
+        <div style="margin-bottom:28px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+            <div style="width:8px;height:8px;background:var(--neon-green);border-radius:50%;box-shadow:0 0 8px var(--neon-green);"></div>
+            <span style="font-size:0.85rem;font-weight:700;color:var(--text-secondary);">مثال على صفحتك النهائية</span>
+          </div>
+          <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(99,179,237,0.25);border-radius:16px;overflow:hidden;box-shadow:0 0 40px rgba(0,212,255,0.08);">
+            <!-- Demo cover -->
+            <div style="height:100px;background:linear-gradient(135deg,#00d4ff,#b537f2);position:relative;">
+              <div style="position:absolute;inset:0;background:linear-gradient(to bottom,transparent,rgba(0,0,0,0.3));"></div>
+              <div style="position:absolute;top:12px;right:12px;background:rgba(0,255,136,0.15);border:1px solid rgba(0,255,136,0.4);border-radius:20px;padding:3px 10px;font-size:0.7rem;color:var(--neon-green);font-weight:700;">● متاح للعمل</div>
+            </div>
+            <div style="padding:0 20px 20px;position:relative;">
+              <!-- Avatar -->
+              <div style="width:64px;height:64px;border-radius:50%;border:3px solid #0d1220;background:linear-gradient(135deg,#63b3ed,#9f7aea);display:flex;align-items:center;justify-content:center;font-size:1.6rem;font-weight:700;margin-top:-32px;margin-bottom:12px;">أ</div>
+              <div style="font-size:1.15rem;font-weight:800;margin-bottom:3px;">أحمد محمد</div>
+              <div style="font-size:0.85rem;color:var(--accent);margin-bottom:8px;">مطوّر ويب وتطبيقات موبايل</div>
+              <div style="font-size:0.8rem;color:var(--text-secondary);line-height:1.6;margin-bottom:14px;">أعمل على بناء تجارب رقمية مميزة باستخدام أحدث التقنيات. خبرة 4 سنوات في React و Node.js.</div>
+              <!-- Skills -->
+              <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;">
+                <span style="background:rgba(99,179,237,0.12);border:1px solid rgba(99,179,237,0.25);border-radius:99px;padding:3px 12px;font-size:0.75rem;color:var(--accent);">React</span>
+                <span style="background:rgba(99,179,237,0.12);border:1px solid rgba(99,179,237,0.25);border-radius:99px;padding:3px 12px;font-size:0.75rem;color:var(--accent);">Node.js</span>
+                <span style="background:rgba(99,179,237,0.12);border:1px solid rgba(99,179,237,0.25);border-radius:99px;padding:3px 12px;font-size:0.75rem;color:var(--accent);">Flutter</span>
+                <span style="background:rgba(99,179,237,0.12);border:1px solid rgba(99,179,237,0.25);border-radius:99px;padding:3px 12px;font-size:0.75rem;color:var(--accent);">Firebase</span>
+              </div>
+              <!-- Links -->
+              <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <span style="background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;padding:5px 12px;font-size:0.75rem;color:var(--text-secondary);">🐙 GitHub</span>
+                <span style="background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;padding:5px 12px;font-size:0.75rem;color:var(--text-secondary);">💼 LinkedIn</span>
+                <span style="background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;padding:5px 12px;font-size:0.75rem;color:var(--text-secondary);">📱 WhatsApp</span>
+              </div>
+            </div>
+          </div>
+          <div style="text-align:center;margin-top:10px;font-size:0.78rem;color:var(--text-muted);">
+            👆 هذه ستكون صفحتك — رابطها: <span style="color:var(--accent);">yoursite.com/p/<strong>ahmed</strong></span>
+          </div>
         </div>
 
-        <!-- Login Form -->
-        <div id="login-form" class="auth-form">
-          <div class="form-group">
-            <label class="form-label">البريد الإلكتروني</label>
-            <input type="email" id="login-email" class="form-input" placeholder="example@email.com" dir="ltr">
+        <!-- How-to Steps -->
+        <div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:16px;padding:24px;">
+          <div style="font-size:1rem;font-weight:800;margin-bottom:20px;display:flex;align-items:center;gap:8px;">
+            🗺️ كيف تبني صفحتك في 4 خطوات
           </div>
-          <div class="form-group">
-            <label class="form-label">كلمة المرور</label>
-            <input type="password" id="login-password" class="form-input" placeholder="••••••••" dir="ltr">
+          <div style="display:flex;flex-direction:column;gap:16px;">
+            <div style="display:flex;gap:14px;align-items:flex-start;">
+              <div style="width:32px;height:32px;min-width:32px;background:var(--gradient-2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:0.9rem;">1</div>
+              <div>
+                <div style="font-weight:700;margin-bottom:3px;">أنشئ حسابك</div>
+                <div style="font-size:0.82rem;color:var(--text-secondary);">سجّل بالبريد الإلكتروني أو بضغطة واحدة عبر Google — مجاني 100%</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:14px;align-items:flex-start;">
+              <div style="width:32px;height:32px;min-width:32px;background:var(--gradient-2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:0.9rem;">2</div>
+              <div>
+                <div style="font-weight:700;margin-bottom:3px;">أدخل بياناتك من قسم "تعديل الملف"</div>
+                <div style="font-size:0.82rem;color:var(--text-secondary);">اسمك، مسماك الوظيفي، نبذة عنك، صورتك، وبيانات التواصل</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:14px;align-items:flex-start;">
+              <div style="width:32px;height:32px;min-width:32px;background:var(--gradient-2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:0.9rem;">3</div>
+              <div>
+                <div style="font-weight:700;margin-bottom:3px;">أضف مهاراتك ومشاريعك</div>
+                <div style="font-size:0.82rem;color:var(--text-secondary);">اكتب مهاراتك ثم اضغط Enter، وأضف مشاريعك مع صورها وروابطها</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:14px;align-items:flex-start;">
+              <div style="width:32px;height:32px;min-width:32px;background:linear-gradient(135deg,#00ff88,#00d4ff);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:0.9rem;">✓</div>
+              <div>
+                <div style="font-weight:700;margin-bottom:3px;">احفظ وشارك رابطك!</div>
+                <div style="font-size:0.82rem;color:var(--text-secondary);">اضغط "حفظ التغييرات" وستجد رابطك الخاص جاهزاً للمشاركة مع الجميع</div>
+              </div>
+            </div>
           </div>
-          <button class="btn btn-primary btn-full" onclick="loginEmail()">
-            🚀 تسجيل الدخول
-          </button>
-          <div class="divider">أو</div>
-          <button class="btn btn-google btn-full" onclick="loginGoogle()">
-            <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-            المتابعة بحساب Google
-          </button>
+          <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);text-align:center;">
+            <button class="btn btn-primary" style="font-size:0.9rem;" onclick="document.querySelectorAll('.auth-tab')[1].click()">
+              🚀 ابدأ الآن — مجاناً
+            </button>
+          </div>
         </div>
 
-        <!-- Register Form -->
-        <div id="register-form" class="auth-form hidden">
-          <div class="form-group">
-            <label class="form-label">الاسم الكامل</label>
-            <input type="text" id="reg-name" class="form-input" placeholder="أحمد محمد">
-          </div>
-          <div class="form-group">
-            <label class="form-label">البريد الإلكتروني</label>
-            <input type="email" id="reg-email" class="form-input" placeholder="example@email.com" dir="ltr">
-          </div>
-          <div class="form-group">
-            <label class="form-label">كلمة المرور</label>
-            <input type="password" id="reg-password" class="form-input" placeholder="••••••••" dir="ltr">
-          </div>
-          <button class="btn btn-primary btn-full" onclick="registerEmail()">
-            ✨ إنشاء حساب جديد
-          </button>
-          <div class="divider">أو</div>
-          <button class="btn btn-google btn-full" onclick="loginGoogle()">
-            <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-            المتابعة بحساب Google
-          </button>
-        </div>
-      </div>
-
-      <div class="auth-features">
-        <div class="feature-item">
-          <div class="feature-icon">⚡</div>
-          <div class="feature-title">سريع وسهل</div>
-          <div class="feature-desc">أنشئ Portfolio في دقائق</div>
-        </div>
-        <div class="feature-item">
-          <div class="feature-icon">🎨</div>
-          <div class="feature-title">3 قوالب احترافية</div>
-          <div class="feature-desc">اختر القالب المناسب</div>
-        </div>
-        <div class="feature-item">
-          <div class="feature-icon">🔗</div>
-          <div class="feature-title">رابط خاص بك</div>
-          <div class="feature-desc">portfolio.app/p/اسمك</div>
-        </div>
-        <div class="feature-item">
-          <div class="feature-icon">📱</div>
-          <div class="feature-title">بطاقة رقمية</div>
-          <div class="feature-desc">VCF وQR Code تلقائي</div>
-        </div>
       </div>
     </div>
   </div>
@@ -1223,6 +1349,41 @@
 
         <!-- ============ DASHBOARD VIEW ============ -->
         <div class="view active" id="view-dashboard">
+
+          <!-- Welcome guide for new users -->
+          <div id="welcome-guide" style="background:linear-gradient(135deg,rgba(0,212,255,0.08),rgba(181,55,242,0.08));border:1px solid rgba(0,212,255,0.25);border-radius:16px;padding:24px;margin-bottom:24px;display:none;">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
+              <div style="font-size:1.05rem;font-weight:800;">👋 مرحباً! إليك كيفية إنشاء صفحتك في 4 خطوات</div>
+              <button onclick="document.getElementById('welcome-guide').style.display='none'" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1.1rem;">✕</button>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;">
+              <div style="background:rgba(0,0,0,0.2);border-radius:10px;padding:14px;cursor:pointer;" onclick="navigate('editor')">
+                <div style="font-size:1.4rem;margin-bottom:6px;">1️⃣</div>
+                <div style="font-weight:700;font-size:0.9rem;margin-bottom:4px;">أدخل بياناتك</div>
+                <div style="font-size:0.78rem;color:var(--text-secondary);">من قسم "تعديل الملف الشخصي" ← أضف اسمك وصورتك ونبذتك</div>
+                <div style="margin-top:8px;font-size:0.75rem;color:var(--accent);">← انقر للبدء</div>
+              </div>
+              <div style="background:rgba(0,0,0,0.2);border-radius:10px;padding:14px;cursor:pointer;" onclick="navigate('skills')">
+                <div style="font-size:1.4rem;margin-bottom:6px;">2️⃣</div>
+                <div style="font-weight:700;font-size:0.9rem;margin-bottom:4px;">أضف مهاراتك</div>
+                <div style="font-size:0.78rem;color:var(--text-secondary);">اكتب المهارة واضغط Enter أو زر + إضافة</div>
+                <div style="margin-top:8px;font-size:0.75rem;color:var(--accent);">← انقر للبدء</div>
+              </div>
+              <div style="background:rgba(0,0,0,0.2);border-radius:10px;padding:14px;cursor:pointer;" onclick="navigate('projects')">
+                <div style="font-size:1.4rem;margin-bottom:6px;">3️⃣</div>
+                <div style="font-weight:700;font-size:0.9rem;margin-bottom:4px;">أضف مشاريعك</div>
+                <div style="font-size:0.78rem;color:var(--text-secondary);">اضغط + إضافة مشروع وأدخل اسمه ووصفه ورابطه</div>
+                <div style="margin-top:8px;font-size:0.75rem;color:var(--accent);">← انقر للبدء</div>
+              </div>
+              <div style="background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.2);border-radius:10px;padding:14px;cursor:pointer;" onclick="navigate('editor')">
+                <div style="font-size:1.4rem;margin-bottom:6px;">✅</div>
+                <div style="font-weight:700;font-size:0.9rem;margin-bottom:4px;">احفظ وشارك!</div>
+                <div style="font-size:0.78rem;color:var(--text-secondary);">اضغط "حفظ التغييرات" وستحصل على رابطك الشخصي فوراً</div>
+                <div style="margin-top:8px;font-size:0.75rem;color:var(--neon-green);">← الخطوة الأخيرة</div>
+              </div>
+            </div>
+          </div>
+
           <div class="stats-grid">
             <div class="stat-card">
               <div class="stat-icon blue">👁️</div>
@@ -1296,11 +1457,12 @@
                 <input type="text" id="f-name" class="form-input" placeholder="أحمد محمد">
               </div>
               <div class="form-group">
-                <label class="form-label">اسم المستخدم (الرابط) *</label>
+                <label class="form-label">اسم المستخدم (رابط صفحتك) *</label>
                 <div class="username-wrap">
                   <input type="text" id="f-username" class="form-input" placeholder="ahmed" dir="ltr" oninput="checkUsername(this.value)" style="padding-left: 90px;">
                   <span class="username-status" id="username-status"></span>
                 </div>
+                <div style="font-size:0.75rem;color:var(--text-muted);margin-top:4px;">📎 أحرف إنجليزية وأرقام فقط — مثلاً: <strong style="color:var(--accent);">ahmed</strong> أو <strong style="color:var(--accent);">ali123</strong></div>
               </div>
               <div class="form-group">
                 <label class="form-label">المسمى الوظيفي</label>
@@ -1580,6 +1742,26 @@
     const storage = getStorage(app);
     const googleProvider = new GoogleAuthProvider();
 
+    // Safety timeout: if Firebase auth doesn't respond in 6s, show auth screen anyway
+    const loadingFallbackTimer = setTimeout(() => {
+      const fb = document.getElementById('loader-fallback');
+      const ls = document.getElementById('loading-screen');
+      if (fb && ls && !ls.classList.contains('hidden')) {
+        fb.style.display = 'block';
+        document.getElementById('loader-status').textContent = 'حدث تأخير في الاتصال...';
+      }
+    }, 6000);
+
+    // Force show after 12s no matter what
+    setTimeout(() => {
+      clearTimeout(loadingFallbackTimer);
+      const ls = document.getElementById('loading-screen');
+      if (ls && !ls.classList.contains('hidden')) {
+        hideLoadingScreen();
+        showAuth();
+      }
+    }, 12000);
+
     /* ============================================
        GLOBAL STATE
     ============================================ */
@@ -1632,6 +1814,7 @@
        AUTH STATE
     ============================================ */
     onAuthStateChanged(auth, async (user) => {
+      clearTimeout(loadingFallbackTimer);
       hideLoadingScreen();
       if (user) {
         currentUser = user;
@@ -2074,18 +2257,22 @@
     function renderDashboard(data) {
       const area = document.getElementById('dashboard-portfolio-area');
       const createBtn = document.getElementById('create-btn');
+      const guide = document.getElementById('welcome-guide');
 
       if (!data) {
         createBtn.style.display = '';
+        if (guide) guide.style.display = 'block'; // show guide for new users
         area.innerHTML = `
-          <div class="empty-state card">
-            <div class="empty-state-icon">✨</div>
-            <div class="empty-state-title">لم تنشئ Portfolio بعد</div>
-            <div class="empty-state-desc">ابدأ الآن وأنشئ ملفك الشخصي الاحترافي</div>
-            <button class="btn btn-primary" onclick="navigate('editor')">+ إنشاء Portfolio</button>
+          <div class="empty-state card" style="text-align:center;padding:40px 24px;">
+            <div class="empty-state-icon" style="font-size:3rem;margin-bottom:16px;">✨</div>
+            <div class="empty-state-title" style="font-size:1.2rem;font-weight:800;margin-bottom:8px;">لم تنشئ Portfolio بعد</div>
+            <div class="empty-state-desc" style="color:var(--text-secondary);margin-bottom:20px;line-height:1.6;">اتبع الخطوات أعلاه وأنشئ ملفك الشخصي الاحترافي الآن</div>
+            <button class="btn btn-primary" onclick="navigate('editor')" style="font-size:1rem;padding:14px 32px;">🚀 إنشاء Portfolio الآن</button>
           </div>`;
         return;
       }
+
+      if (guide) guide.style.display = 'none'; // hide guide once portfolio exists
 
       createBtn.style.display = 'none';
       const link = `${window.location.origin}/p/${data.username}`;
@@ -2503,15 +2690,51 @@
     }
 
     function showAuth() {
-      document.getElementById('auth-screen').style.display = 'flex';
+      const authEl = document.getElementById('auth-screen');
+      authEl.style.display = 'flex';
+      authEl.style.justifyContent = 'center';
+      authEl.style.alignItems = 'flex-start';
+      authEl.style.minHeight = '100vh';
       document.getElementById('app').classList.remove('visible');
     }
 
     function hideLoadingScreen() {
       const ls = document.getElementById('loading-screen');
+      if (!ls) return;
       ls.classList.add('hidden');
-      setTimeout(() => ls.remove(), 700);
+      setTimeout(() => { if(ls.parentNode) ls.remove(); }, 700);
     }
+
+    // Fallback: if Firebase takes too long, show auth screen anyway
+    window.forceShowAuth = () => {
+      hideLoadingScreen();
+      showAuth();
+    };
+
+    // Show password toggle
+    window.togglePassword = (inputId, btn) => {
+      const inp = document.getElementById(inputId);
+      if (inp.type === 'password') { inp.type = 'text'; btn.textContent = '🙈'; }
+      else { inp.type = 'password'; btn.textContent = '👁️'; }
+    };
+
+    // Password strength indicator
+    window.checkPasswordStrength = (val) => {
+      const fill = document.getElementById('pwd-strength-fill');
+      const text = document.getElementById('pwd-strength-text');
+      if (!fill || !val) return;
+      let score = 0;
+      if (val.length >= 6) score++;
+      if (val.length >= 10) score++;
+      if (/[A-Z]/.test(val)) score++;
+      if (/[0-9]/.test(val)) score++;
+      if (/[^A-Za-z0-9]/.test(val)) score++;
+      const colors = ['#fc814a','#f6ad55','#ffd700','#00d4ff','#00ff88'];
+      const labels = ['ضعيفة جداً','ضعيفة','متوسطة','قوية','قوية جداً 💪'];
+      fill.style.width = (score * 20) + '%';
+      fill.style.background = colors[score-1] || '#fc814a';
+      text.textContent = score > 0 ? 'قوة كلمة المرور: ' + (labels[score-1]||'') : '';
+    };
 
     function updateSidebar(user) {
       document.getElementById('sb-name').textContent = user.displayName || 'المستخدم';
